@@ -1,0 +1,9 @@
+{
+  "schema_version": "1.0.0",
+  "audit_id": "audit_demo_001",
+  "paper_id": "paper_demo_001",
+  "actor": "fixture-worker",
+  "timestamp": "2026-01-01T00:05:00Z",
+  "action": "create",
+  "reason": "Synthetic audit row for schema validation."
+}

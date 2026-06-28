@@ -1,0 +1,11 @@
+.pytest_cache/
+__pycache__/
+*.py[cod]
+.agents/
+.omo/
+fixtures/config/cache/**/*.sqlite3
+fixtures/config/cache/**/*.sqlite3-wal
+fixtures/config/cache/**/*.sqlite3-shm
+fixtures/config/cache/**
+!fixtures/config/cache/**/
+!fixtures/config/cache/**/.gitkeep

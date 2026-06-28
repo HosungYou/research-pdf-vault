@@ -1,0 +1,12 @@
+%PDF-1.4
+1 0 obj << /Type /Catalog /Pages 2 0 R >> endobj
+2 0 obj << /Type /Pages /Kids [3 0 R] /Count 1 >> endobj
+3 0 obj << /Type /Page /Parent 2 0 R >> endobj
+%%RPV_PAGE 1
+Synthetic official report for the public fixture library.
+Methods describe local indexing and deterministic vector storage.
+%%RPV_END_PAGE
+%%RPV_PAGE 2
+Results show artifact status rows for indexed Green fixtures.
+%%RPV_END_PAGE
+%%EOF

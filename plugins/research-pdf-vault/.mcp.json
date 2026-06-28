@@ -1,0 +1,11 @@
+{
+  "mcpServers": {
+    "research-pdf-vault": {
+      "command": "python3",
+      "args": [
+        "./scripts/mcp_server.py"
+      ],
+      "cwd": "."
+    }
+  }
+}

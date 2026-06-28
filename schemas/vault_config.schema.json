@@ -1,0 +1,38 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://research-pdf-vault.local/schemas/vault_config.schema.json",
+  "title": "VaultConfig",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "vault_id",
+    "root_path",
+    "created_at",
+    "default_lane"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "1.0.0"
+    },
+    "vault_id": {
+      "type": "string",
+      "pattern": "^vault_[a-z0-9_]+$"
+    },
+    "root_path": {
+      "type": "string",
+      "pattern": "^(?!/)(?!.*(?:^|/)\\.\\.(?:/|$)).+"
+    },
+    "created_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "default_lane": {
+      "enum": [
+        "green",
+        "amber",
+        "red"
+      ]
+    }
+  }
+}

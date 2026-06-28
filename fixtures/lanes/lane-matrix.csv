@@ -1,0 +1,10 @@
+case_id,path,title,document_type_hint,traits,light_text_excerpt,expected_lane,expected_review_queue,expected_metadata_only
+green_research_article,fixtures/classification/green/research-article.pdf,Synthetic Research Article,research_article,,Abstract Methods Results Discussion,green,false,false
+green_official_report,fixtures/classification/green/official-report.pdf,Synthetic Official Report,official_report,,Official annual report with public findings,green,false,false
+amber_presentation_unknown,fixtures/classification/amber/meeting-deck.pdf,Synthetic Slides,presentation,,Slide deck with agenda and bullet points,amber,true,false
+amber_unknown_document_type,fixtures/classification/amber/unknown-provenance.pdf,Synthetic Unknown Document,unknown,,Public summary with unresolved source type,amber,true,false
+amber_duplicate_conflict,fixtures/classification/amber/research-copy.pdf,Synthetic Duplicate,research_article,duplicate_conflict,Abstract Methods Results Discussion,amber,true,false
+red_irb_student_sensitive,fixtures/classification/private/student-irb-notes.pdf,Synthetic Participant Notes,unknown,,IRB protocol student participant consent notes,red,false,true
+red_encrypted,fixtures/classification/red/encrypted.pdf,Synthetic Encrypted Report,official_report,encrypted,Official report excerpt unavailable,red,false,true
+red_corrupt,fixtures/classification/red/corrupt.pdf,Synthetic Corrupt Report,official_report,corrupt,Official report excerpt unavailable,red,false,true
+red_restricted_path,fixtures/classification/restricted/research.pdf,Synthetic Restricted Report,research_article,,Abstract Methods Results Discussion,red,false,true

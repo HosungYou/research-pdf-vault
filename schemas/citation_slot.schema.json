@@ -1,0 +1,69 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://research-pdf-vault.local/schemas/citation_slot.schema.json",
+  "title": "CitationSlot",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "citation_slot_id",
+    "paper_id",
+    "claim_id",
+    "slot_label",
+    "source_location",
+    "support_tag"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "1.0.0"
+    },
+    "citation_slot_id": {
+      "type": "string",
+      "pattern": "^slot_[a-z0-9_]+$"
+    },
+    "paper_id": {
+      "type": "string",
+      "readOnly": true,
+      "pattern": "^paper_[a-z0-9_]+$"
+    },
+    "claim_id": {
+      "type": "string",
+      "pattern": "^claim_[a-z0-9_]+$"
+    },
+    "slot_label": {
+      "type": "string",
+      "minLength": 1
+    },
+    "source_location": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "page",
+        "start_offset",
+        "end_offset"
+      ],
+      "properties": {
+        "page": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "start_offset": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "end_offset": {
+          "type": "integer",
+          "minimum": 1
+        }
+      }
+    },
+    "support_tag": {
+      "enum": [
+        "supports",
+        "contradicts",
+        "mixed",
+        "context"
+      ]
+    }
+  }
+}

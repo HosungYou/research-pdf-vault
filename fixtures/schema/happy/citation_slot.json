@@ -1,0 +1,13 @@
+{
+  "schema_version": "1.0.0",
+  "citation_slot_id": "slot_demo_001",
+  "paper_id": "paper_demo_001",
+  "claim_id": "claim_demo_001",
+  "slot_label": "background",
+  "source_location": {
+    "page": 1,
+    "start_offset": 10,
+    "end_offset": 120
+  },
+  "support_tag": "context"
+}

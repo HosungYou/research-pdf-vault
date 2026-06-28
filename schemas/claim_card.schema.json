@@ -1,0 +1,69 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://research-pdf-vault.local/schemas/claim_card.schema.json",
+  "title": "ClaimCard",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "claim_id",
+    "paper_id",
+    "passage_id",
+    "claim_text",
+    "support_tag",
+    "source_location"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "1.0.0"
+    },
+    "claim_id": {
+      "type": "string",
+      "pattern": "^claim_[a-z0-9_]+$"
+    },
+    "paper_id": {
+      "type": "string",
+      "readOnly": true,
+      "pattern": "^paper_[a-z0-9_]+$"
+    },
+    "passage_id": {
+      "type": "string",
+      "pattern": "^passage_[a-z0-9_]+$"
+    },
+    "claim_text": {
+      "type": "string",
+      "minLength": 1
+    },
+    "support_tag": {
+      "enum": [
+        "supports",
+        "contradicts",
+        "mixed",
+        "context"
+      ]
+    },
+    "source_location": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "page",
+        "start_offset",
+        "end_offset"
+      ],
+      "properties": {
+        "page": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "start_offset": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "end_offset": {
+          "type": "integer",
+          "minimum": 1
+        }
+      }
+    }
+  }
+}

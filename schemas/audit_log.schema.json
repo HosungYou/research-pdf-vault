@@ -1,0 +1,51 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://research-pdf-vault.local/schemas/audit_log.schema.json",
+  "title": "AuditLog",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "audit_id",
+    "paper_id",
+    "actor",
+    "timestamp",
+    "action",
+    "reason"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "1.0.0"
+    },
+    "audit_id": {
+      "type": "string",
+      "pattern": "^audit_[a-z0-9_]+$"
+    },
+    "paper_id": {
+      "type": "string",
+      "readOnly": true,
+      "pattern": "^paper_[a-z0-9_]+$"
+    },
+    "actor": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9_-]{2,63}$"
+    },
+    "timestamp": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "action": {
+      "enum": [
+        "create",
+        "update",
+        "classify",
+        "quarantine",
+        "release"
+      ]
+    },
+    "reason": {
+      "type": "string",
+      "minLength": 1
+    }
+  }
+}

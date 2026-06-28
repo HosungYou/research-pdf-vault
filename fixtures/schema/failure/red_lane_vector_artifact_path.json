@@ -1,0 +1,12 @@
+{
+  "schema_version": "1.0.0",
+  "artifact_id": "artifact_red_vector_001",
+  "paper_id": "paper_demo_001",
+  "artifact_kind": "vector_index",
+  "lane": "red",
+  "stage_status": "complete",
+  "artifact_digest": "sha256:dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd",
+  "created_at": "2026-01-01T00:40:00Z",
+  "artifact_path": "fixtures/schema/artifacts/red.index",
+  "vector_artifact_path": "fixtures/schema/artifacts/red.vectors"
+}

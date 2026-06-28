@@ -1,0 +1,13 @@
+{
+  "schema_version": "1.0.0",
+  "claim_id": "claim_demo_001",
+  "paper_id": "paper_demo_001",
+  "passage_id": "passage_demo_001",
+  "claim_text": "Synthetic claim for schema validation.",
+  "support_tag": "supports",
+  "source_location": {
+    "page": 1,
+    "start_offset": 10,
+    "end_offset": 120
+  }
+}

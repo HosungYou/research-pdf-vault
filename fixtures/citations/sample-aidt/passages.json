@@ -1,0 +1,47 @@
+{
+  "project": "sample-aidt",
+  "passages": [
+    {
+      "passage_id": "passage_sample_aidt_direct_001",
+      "paper_id": "paper_sample_aidt_001",
+      "source": "sample-aidt/direct-learning-gains.pdf",
+      "page": 4,
+      "location": "p. 4, results",
+      "start_offset": 118,
+      "end_offset": 326,
+      "passage": "In a randomized classroom study, AI tutoring improved algebra post-test scores by 12 percentage points compared with conventional homework.",
+      "proposed_claim": "AI tutoring improved algebra post-test scores by 12 percentage points in a randomized classroom study.",
+      "support_tag": "direct_support",
+      "confidence": 0.93,
+      "gap_reason": ""
+    },
+    {
+      "passage_id": "passage_sample_aidt_analogy_001",
+      "paper_id": "paper_sample_aidt_002",
+      "source": "sample-aidt/teacher-dashboard-analogy.pdf",
+      "page": 9,
+      "location": "p. 9, discussion",
+      "start_offset": 412,
+      "end_offset": 590,
+      "passage": "The coaching dashboard resembles adaptive tutoring systems because both recommend next steps after reviewing learner progress.",
+      "proposed_claim": "Teacher coaching dashboards are analogous to adaptive tutoring systems.",
+      "support_tag": "analogy_only",
+      "confidence": 0.58,
+      "gap_reason": "Analogy does not directly study AI tutoring effects in the target manuscript context."
+    },
+    {
+      "passage_id": "passage_sample_aidt_gap_001",
+      "paper_id": "paper_sample_aidt_003",
+      "source": "sample-aidt/metadata-only-record.json",
+      "page": null,
+      "location": "metadata-only record",
+      "start_offset": 0,
+      "end_offset": 1,
+      "passage": "Metadata record lists keywords for AI tutoring but provides no source passage supporting a manuscript claim.",
+      "proposed_claim": "AI tutoring improves learner outcomes.",
+      "support_tag": "gap",
+      "confidence": 0.21,
+      "gap_reason": "Metadata-only record has no passage-level support for the proposed manuscript claim."
+    }
+  ]
+}

@@ -1,0 +1,10 @@
+{
+  "schema_version": "1.0.0",
+  "decision_id": "decision_demo_001",
+  "paper_id": "paper_demo_001",
+  "lane": "green",
+  "stage_status": "complete",
+  "actor": "fixture-worker",
+  "timestamp": "2026-01-01T00:03:00Z",
+  "reason": "Synthetic row classified as safe for schema testing."
+}

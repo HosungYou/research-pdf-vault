@@ -1,0 +1,7 @@
+{
+  "schema_version": "1.0.0",
+  "vault_id": "vault_demo",
+  "root_path": "fixtures/schema/vault-root",
+  "created_at": "2026-01-01T00:00:00Z",
+  "default_lane": "amber"
+}

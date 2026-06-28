@@ -1,0 +1,59 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://research-pdf-vault.local/schemas/paper.schema.json",
+  "title": "Paper",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "paper_id",
+    "title",
+    "normalized_identifiers",
+    "lane",
+    "created_at"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "1.0.0"
+    },
+    "paper_id": {
+      "type": "string",
+      "readOnly": true,
+      "pattern": "^paper_[a-z0-9_]+$"
+    },
+    "title": {
+      "type": "string",
+      "minLength": 1
+    },
+    "normalized_identifiers": {
+      "type": "object",
+      "additionalProperties": false,
+      "minProperties": 1,
+      "properties": {
+        "doi": {
+          "type": "string",
+          "pattern": "^10\\.[0-9]{4,9}/[-._;()/:A-Za-z0-9]+$"
+        },
+        "arxiv_id": {
+          "type": "string",
+          "pattern": "^[0-9]{4}\\.[0-9]{4,5}(v[0-9]+)?$"
+        },
+        "openalex_id": {
+          "type": "string",
+          "pattern": "^W[0-9]+$"
+        }
+      }
+    },
+    "lane": {
+      "enum": [
+        "green",
+        "amber",
+        "red"
+      ]
+    },
+    "created_at": {
+      "type": "string",
+      "format": "date-time"
+    }
+  }
+}

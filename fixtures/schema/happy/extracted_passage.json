@@ -1,0 +1,13 @@
+{
+  "schema_version": "1.0.0",
+  "passage_id": "passage_demo_001",
+  "paper_id": "paper_demo_001",
+  "instance_id": "instance_demo_001",
+  "source_location": {
+    "page": 1,
+    "start_offset": 10,
+    "end_offset": 120
+  },
+  "text": "Synthetic passage text for schema validation.",
+  "support_tag": "supports"
+}

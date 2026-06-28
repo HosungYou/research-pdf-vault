@@ -1,0 +1,114 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://research-pdf-vault.local/schemas/artifact_status.schema.json",
+  "title": "ArtifactStatus",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "artifact_id",
+    "paper_id",
+    "artifact_kind",
+    "lane",
+    "stage_status",
+    "artifact_digest",
+    "created_at"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "1.0.0"
+    },
+    "artifact_id": {
+      "type": "string",
+      "pattern": "^artifact_[a-z0-9_]+$"
+    },
+    "paper_id": {
+      "type": "string",
+      "readOnly": true,
+      "pattern": "^paper_[a-z0-9_]+$"
+    },
+    "artifact_kind": {
+      "enum": [
+        "metadata",
+        "extracted_text",
+        "ocr_text",
+        "vector_index",
+        "claim_cards",
+        "citations",
+        "worker_report"
+      ]
+    },
+    "lane": {
+      "enum": [
+        "green",
+        "amber",
+        "red"
+      ]
+    },
+    "stage_status": {
+      "enum": [
+        "pending",
+        "running",
+        "complete",
+        "failed",
+        "quarantined"
+      ]
+    },
+    "artifact_digest": {
+      "type": "string",
+      "pattern": "^sha256:[a-f0-9]{64}$"
+    },
+    "created_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "artifact_path": {
+      "type": "string",
+      "pattern": "^(?!/)(?!.*(?:^|/)\\.\\.(?:/|$)).+"
+    },
+    "vector_artifact_path": {
+      "type": "string",
+      "pattern": "^(?!/)(?!.*(?:^|/)\\.\\.(?:/|$)).+"
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "lane": {
+            "const": "red"
+          }
+        },
+        "required": [
+          "lane"
+        ]
+      },
+      "then": {
+        "not": {
+          "required": [
+            "vector_artifact_path"
+          ]
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "stage_status": {
+            "const": "quarantined"
+          }
+        },
+        "required": [
+          "stage_status"
+        ]
+      },
+      "then": {
+        "not": {
+          "required": [
+            "vector_artifact_path"
+          ]
+        }
+      }
+    }
+  ]
+}

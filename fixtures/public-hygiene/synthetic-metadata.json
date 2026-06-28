@@ -1,0 +1,11 @@
+{
+  "fixture_id": "synthetic-public-hygiene-001",
+  "title": "Synthetic Retrieval Safety Notes",
+  "authors": ["Example Author"],
+  "source": "synthetic",
+  "storage_root": "<vault-root>/<library-name>",
+  "cache_root": "<cache-root>/research-pdf-vault",
+  "manifest_db": "<cache-root>/research-pdf-vault/manifest.sqlite3",
+  "lane": "green",
+  "notes": "Original metadata created for public hygiene tests."
+}

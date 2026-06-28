@@ -1,0 +1,11 @@
+{
+  "schema_version": "1.0.0",
+  "report_id": "report_demo_001",
+  "worker_name": "fixture-worker",
+  "paper_id": "paper_demo_001",
+  "stage_status": "complete",
+  "started_at": "2026-01-01T00:30:00Z",
+  "finished_at": "2026-01-01T00:31:00Z",
+  "artifact_digest": "sha256:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+  "summary": "Synthetic worker report."
+}

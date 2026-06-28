@@ -1,0 +1,62 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://research-pdf-vault.local/schemas/review_queue_item.schema.json",
+  "title": "ReviewQueueItem",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "queue_item_id",
+    "paper_id",
+    "lane",
+    "stage_status",
+    "priority",
+    "reason",
+    "created_at"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "1.0.0"
+    },
+    "queue_item_id": {
+      "type": "string",
+      "pattern": "^queue_[a-z0-9_]+$"
+    },
+    "paper_id": {
+      "type": "string",
+      "readOnly": true,
+      "pattern": "^paper_[a-z0-9_]+$"
+    },
+    "lane": {
+      "enum": [
+        "green",
+        "amber",
+        "red"
+      ]
+    },
+    "stage_status": {
+      "enum": [
+        "pending",
+        "running",
+        "complete",
+        "failed",
+        "quarantined"
+      ]
+    },
+    "priority": {
+      "enum": [
+        "low",
+        "normal",
+        "high"
+      ]
+    },
+    "reason": {
+      "type": "string",
+      "minLength": 1
+    },
+    "created_at": {
+      "type": "string",
+      "format": "date-time"
+    }
+  }
+}

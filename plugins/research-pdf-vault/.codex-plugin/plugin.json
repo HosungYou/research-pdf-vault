@@ -1,0 +1,19 @@
+{
+  "name": "research-pdf-vault",
+  "version": "0.1.0",
+  "description": "Research Pdf Vault plugin",
+  "author": {
+    "name": "Local developer"
+  },
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "Research Pdf Vault",
+    "shortDescription": "Use Research Pdf Vault in Codex.",
+    "longDescription": "Research Pdf Vault adds a local Codex plugin scaffold.",
+    "developerName": "Local developer",
+    "category": "Productivity",
+    "capabilities": [],
+    "defaultPrompt": "Help me use Research Pdf Vault."
+  },
+  "mcpServers": "./.mcp.json"
+}

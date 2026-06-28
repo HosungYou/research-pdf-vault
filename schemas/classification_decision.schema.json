@@ -1,0 +1,59 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://research-pdf-vault.local/schemas/classification_decision.schema.json",
+  "title": "ClassificationDecision",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "decision_id",
+    "paper_id",
+    "lane",
+    "stage_status",
+    "actor",
+    "timestamp",
+    "reason"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "1.0.0"
+    },
+    "decision_id": {
+      "type": "string",
+      "pattern": "^decision_[a-z0-9_]+$"
+    },
+    "paper_id": {
+      "type": "string",
+      "readOnly": true,
+      "pattern": "^paper_[a-z0-9_]+$"
+    },
+    "lane": {
+      "enum": [
+        "green",
+        "amber",
+        "red"
+      ]
+    },
+    "stage_status": {
+      "enum": [
+        "pending",
+        "running",
+        "complete",
+        "failed",
+        "quarantined"
+      ]
+    },
+    "actor": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9_-]{2,63}$"
+    },
+    "timestamp": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "reason": {
+      "type": "string",
+      "minLength": 1
+    }
+  }
+}

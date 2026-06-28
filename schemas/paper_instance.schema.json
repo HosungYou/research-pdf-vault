@@ -1,0 +1,53 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://research-pdf-vault.local/schemas/paper_instance.schema.json",
+  "title": "PaperInstance",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "instance_id",
+    "paper_id",
+    "file_path",
+    "sha256",
+    "instance_status",
+    "discovered_at"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "1.0.0"
+    },
+    "instance_id": {
+      "type": "string",
+      "pattern": "^instance_[a-z0-9_]+$"
+    },
+    "paper_id": {
+      "type": "string",
+      "readOnly": true,
+      "pattern": "^paper_[a-z0-9_]+$"
+    },
+    "file_path": {
+      "type": "string",
+      "pattern": "^(?!/)(?!.*(?:^|/)\\.\\.(?:/|$)).+"
+    },
+    "sha256": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "instance_status": {
+      "enum": [
+        "available",
+        "missing",
+        "pending_sync",
+        "quarantined"
+      ]
+    },
+    "discovered_at": {
+      "type": "string",
+      "format": "date-time"
+    }
+  }
+}

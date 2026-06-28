@@ -1,0 +1,18 @@
+storage_roots = ["../storage-roots/synthetic-library"]
+cache_root = "../CloudStorage/simulated-cache"
+manifest_db = "../CloudStorage/simulated-cache/manifest.sqlite3"
+ocr_engine = "none"
+embedding_backend = "fixture"
+local_llm_backend = "disabled"
+enable_external_models = false
+max_external_passage_chars = 1200
+
+[review_thresholds]
+green_min_confidence = 0.86
+amber_review_max_confidence = 0.70
+red_min_confidence = 0.95
+
+[privacy]
+allow_cloud_cache = true
+red_lane_metadata_only = true
+allow_external_pdf_upload = false
