@@ -9,6 +9,10 @@ from typing import Protocol, Sequence
 
 sys.dont_write_bytecode = True
 
+from _runtime_guard import ensure_supported_python
+
+ensure_supported_python()
+
 from research_pdf_vault.config import (
     ConfigLoadRequest,
     ConfigValidationError,
