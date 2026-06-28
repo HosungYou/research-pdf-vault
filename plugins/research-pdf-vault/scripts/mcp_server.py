@@ -14,6 +14,10 @@ from typing import Sequence
 
 sys.dont_write_bytecode = True
 
+from _runtime_guard import ensure_supported_python
+
+ensure_supported_python()
+
 from research_pdf_vault.config import ConfigValidationError
 from research_pdf_vault.mcp_protocol import run_stdio_server
 from research_pdf_vault.mcp_self_test import build_self_test_payload
