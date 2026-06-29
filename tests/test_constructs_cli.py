@@ -104,6 +104,45 @@ def test_literature_map_build_when_construct_candidates_exist_then_adds_edges(
     assert payload["edge_counts"] == {"measures_construct": 2}
 
 
+def test_constructs_export_when_candidates_exist_then_writes_jsonl_and_markdown(
+    tmp_path: Path,
+) -> None:
+    # Given
+    library = tmp_path / "library"
+    library.mkdir()
+    (library / "constructs.pdf").write_bytes(TEXT_PDF_BYTES)
+    config_path = tmp_path / "rpv.toml"
+    config_path.write_text(_config_text(), encoding="utf-8")
+    jsonl_path = tmp_path / "cache" / "exports" / "construct_registry.jsonl"
+    markdown_path = tmp_path / "cache" / "exports" / "construct_registry.md"
+
+    # When
+    ingest = _run_rpv("ingest", "--once", "--config", str(config_path), cwd=tmp_path)
+    build = _run_rpv("constructs", "build", "--config", str(config_path), cwd=tmp_path)
+    export = _run_rpv("constructs", "export", "--config", str(config_path), cwd=tmp_path)
+
+    # Then
+    assert ingest.returncode == 0, ingest.stderr
+    assert build.returncode == 0, build.stderr
+    assert export.returncode == 0, export.stderr
+    assert f"jsonl={jsonl_path}" in export.stdout
+    assert f"markdown={markdown_path}" in export.stdout
+    rows = [
+        json.loads(line)
+        for line in jsonl_path.read_text(encoding="utf-8").splitlines()
+    ]
+    assert [row["canonical_label"] for row in rows] == [
+        "ai acceptance",
+        "perceived usefulness",
+    ]
+    assert rows[0]["candidates"][0]["reported_term"] == "AI acceptance"
+    assert rows[0]["candidates"][0]["theoretical_role"] == "outcome"
+    markdown = markdown_path.read_text(encoding="utf-8")
+    assert "# Construct Registry" in markdown
+    assert "## ai acceptance" in markdown
+    assert "UTAUT survey scale" in markdown
+
+
 def _config_text() -> str:
     return "\n".join(
         (
