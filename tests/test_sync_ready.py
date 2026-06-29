@@ -6,6 +6,8 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Final
 
+import pytest
+
 ROOT: Final = Path(__file__).resolve().parents[1]
 SCRIPTS_DIR: Final = ROOT / "plugins" / "research-pdf-vault" / "scripts"
 sys.path.insert(0, str(SCRIPTS_DIR))
@@ -98,4 +100,30 @@ def test_probe_sync_ready_when_header_is_invalid_then_pending_with_hash(
     # Then
     assert result.status is SyncReadyStatus.INVALID_PDF_HEADER
     assert result.sha256 == hashlib.sha256(invalid_bytes).hexdigest()
+    assert result.retry_after_seconds == 300
+
+
+def test_probe_sync_ready_when_probe_read_times_out_then_pending(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    import research_pdf_vault.sync_ready as sync_ready
+
+    # Given
+    pdf_path = tmp_path / "unit-timeout.pdf"
+    pdf_path.write_bytes(PDF_BYTES)
+
+    def raise_timeout(path: Path, timeout_seconds: float) -> None:
+        _ = path
+        _ = timeout_seconds
+        raise sync_ready.SyncProbeTimeoutError
+
+    monkeypatch.setattr(sync_ready, "_read_probe_byte", raise_timeout)
+
+    # When
+    result = sync_ready.probe_sync_ready(pdf_path)
+
+    # Then
+    assert result.status is sync_ready.SyncReadyStatus.READ_ERROR
+    assert result.provider_status == "read_timeout"
     assert result.retry_after_seconds == 300
