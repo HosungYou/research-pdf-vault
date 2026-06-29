@@ -165,7 +165,21 @@ def _pending(
 
 
 def _minimal_pdf_parse_succeeds(payload: bytes) -> bool:
-    return b"%%EOF" in payload and (b"/Page" in payload or b"/Pages" in payload)
+    if b"%%EOF" not in payload:
+        return False
+    if _has_uncompressed_page_tree(payload):
+        return True
+    return _has_compressed_pdf_structure(payload)
+
+
+def _has_uncompressed_page_tree(payload: bytes) -> bool:
+    return b"/Page" in payload or b"/Pages" in payload
+
+
+def _has_compressed_pdf_structure(payload: bytes) -> bool:
+    return b"startxref" in payload and (
+        b"/ObjStm" in payload or b"/XRef" in payload or b"/Type /XRef" in payload
+    )
 
 
 def _read_probe_byte(path: Path, timeout_seconds: float) -> None:
