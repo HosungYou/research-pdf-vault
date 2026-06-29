@@ -1,12 +1,15 @@
 from __future__ import annotations
 
 import hashlib
+import signal
 from dataclasses import dataclass
 from enum import StrEnum, unique
 from pathlib import Path
+from types import FrameType
 from typing import Final, Protocol, assert_never
 
 RETRY_AFTER_SECONDS: Final = 300
+READ_PROBE_TIMEOUT_SECONDS: Final = 0.5
 
 
 class Sample(Protocol):
@@ -34,6 +37,10 @@ class SyncReadyStatus(StrEnum):
 class FileSample:
     size_bytes: int
     mtime_ns: int
+
+
+class SyncProbeTimeoutError(Exception):
+    pass
 
 
 @dataclass(frozen=True, slots=True)
@@ -88,16 +95,21 @@ def probe_sync_metadata(path: Path, provider: str) -> SyncReadyResult:
     )
 
 
-def probe_sync_ready(path: Path, sampler: Sampler = PathSampler()) -> SyncReadyResult:
+def probe_sync_ready(
+    path: Path,
+    sampler: Sampler = PathSampler(),
+    read_probe_timeout_seconds: float = READ_PROBE_TIMEOUT_SECONDS,
+) -> SyncReadyResult:
     if not path.exists():
         return _pending(SyncReadyStatus.MISSING_PATH)
     if not path.is_file():
         return _pending(SyncReadyStatus.NOT_REGULAR_FILE)
     try:
-        with path.open("rb") as handle:
-            handle.read(1)
+        _read_probe_byte(path, read_probe_timeout_seconds)
         first = sampler.sample(path)
         second = sampler.sample(path)
+    except SyncProbeTimeoutError:
+        return _pending(SyncReadyStatus.READ_ERROR, provider_status="read_timeout")
     except OSError:
         return _pending(SyncReadyStatus.READ_ERROR)
     if first.size_bytes != second.size_bytes or first.mtime_ns != second.mtime_ns:
@@ -154,3 +166,23 @@ def _pending(
 
 def _minimal_pdf_parse_succeeds(payload: bytes) -> bool:
     return b"%%EOF" in payload and (b"/Page" in payload or b"/Pages" in payload)
+
+
+def _read_probe_byte(path: Path, timeout_seconds: float) -> None:
+    previous_handler = signal.getsignal(signal.SIGALRM)
+    previous_timer = signal.setitimer(signal.ITIMER_REAL, timeout_seconds)
+    signal.signal(signal.SIGALRM, _handle_probe_timeout)
+    try:
+        with path.open("rb") as handle:
+            handle.read(1)
+    finally:
+        signal.setitimer(signal.ITIMER_REAL, 0)
+        if previous_timer[0] > 0:
+            signal.setitimer(signal.ITIMER_REAL, previous_timer[0], previous_timer[1])
+        signal.signal(signal.SIGALRM, previous_handler)
+
+
+def _handle_probe_timeout(signum: int, frame: FrameType | None) -> None:
+    _ = signum
+    _ = frame
+    raise SyncProbeTimeoutError
