@@ -6,6 +6,7 @@ from dataclasses import dataclass
 from typing import Final, assert_never
 
 from research_pdf_vault.config import VaultRuntimeConfig
+from research_pdf_vault.constructs import initialize_construct_tables
 from research_pdf_vault.db import SCHEMA_VERSION, initialize_database
 from research_pdf_vault.mcp_types import JsonObject
 from research_pdf_vault.scan_db import now_timestamp
@@ -25,8 +26,10 @@ def build_literature_map(config: VaultRuntimeConfig) -> LiteratureMapBuildSummar
     timestamp = now_timestamp()
     with sqlite3.connect(config.manifest_db) as connection:
         initialize_database(connection)
+        initialize_construct_tables(connection)
         _insert_paper_nodes(connection, timestamp)
         _insert_claim_nodes_and_edges(connection, timestamp)
+        _insert_construct_nodes_and_edges(connection, timestamp)
         return LiteratureMapBuildSummary(
             node_count=_table_count(connection, "literature_node"),
             edge_count=_table_count(connection, "literature_edge"),
@@ -38,6 +41,7 @@ def literature_map_report(config: VaultRuntimeConfig) -> JsonObject:
         return _empty_report()
     with sqlite3.connect(config.manifest_db) as connection:
         initialize_database(connection)
+        initialize_construct_tables(connection)
         return {
             "graph_focus": "literature_map",
             "node_counts": _group_counts(connection, "literature_node", "node_kind"),
@@ -89,6 +93,39 @@ def _insert_claim_nodes_and_edges(connection: sqlite3.Connection, timestamp: str
         )
 
 
+def _insert_construct_nodes_and_edges(
+    connection: sqlite3.Connection,
+    timestamp: str,
+) -> None:
+    rows = connection.execute(
+        "SELECT c.construct_id, c.paper_id, c.candidate_normalization, c.confidence, p.lane "
+        "FROM construct_candidate c JOIN paper p ON p.paper_id = c.paper_id "
+        "ORDER BY c.construct_id, c.paper_id",
+    )
+    for construct_id, paper_id, label, confidence, lane_value in rows:
+        lane = Lane(str(lane_value))
+        construct_node_id = _node_id("construct", str(construct_id))
+        paper_node_id = _node_id("paper", str(paper_id))
+        _upsert_node(
+            connection,
+            node_id=construct_node_id,
+            node_kind="construct",
+            label=_construct_label(str(label), lane),
+            paper_id=str(paper_id),
+            timestamp=timestamp,
+        )
+        _upsert_edge(
+            connection,
+            edge_id=_edge_id(paper_node_id, construct_node_id, "measures_construct"),
+            source_node_id=paper_node_id,
+            target_node_id=construct_node_id,
+            edge_kind="measures_construct",
+            evidence_paper_id=str(paper_id),
+            confidence=float(confidence),
+            timestamp=timestamp,
+        )
+
+
 def _upsert_node(
     connection: sqlite3.Connection,
     *,
@@ -113,6 +150,7 @@ def _upsert_edge(
     target_node_id: str,
     edge_kind: str,
     evidence_paper_id: str,
+    confidence: float = 0.80,
     timestamp: str,
 ) -> None:
     connection.execute(
@@ -125,7 +163,7 @@ def _upsert_edge(
             target_node_id,
             edge_kind,
             evidence_paper_id,
-            0.80,
+            confidence,
             timestamp,
         ),
     )
@@ -147,6 +185,16 @@ def _claim_label(claim_text: str, lane: Lane) -> str:
             return "Red claim (metadata-only)"
         case Lane.GREEN | Lane.AMBER:
             return claim_text
+        case unreachable:
+            assert_never(unreachable)
+
+
+def _construct_label(label: str, lane: Lane) -> str:
+    match lane:
+        case Lane.RED:
+            return "Red construct (metadata-only)"
+        case Lane.GREEN | Lane.AMBER:
+            return label
         case unreachable:
             assert_never(unreachable)
 
