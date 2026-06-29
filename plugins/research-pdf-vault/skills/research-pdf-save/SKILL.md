@@ -77,11 +77,12 @@ python3 plugins/research-pdf-vault/scripts/rpv.py ingest --once --config <config
 
 ```bash
 python3 plugins/research-pdf-vault/scripts/rpv.py constructs build --config <config-path>
+python3 plugins/research-pdf-vault/scripts/rpv.py constructs export --config <config-path>
 python3 plugins/research-pdf-vault/scripts/rpv.py literature-map build --config <config-path>
 python3 plugins/research-pdf-vault/scripts/rpv.py literature-map report --config <config-path>
 ```
 
-7. Report observable counts: scanned, ready, pending, construct registry count, construct candidate count, review-required count, and literature-map node/edge counts.
+7. Report observable counts: scanned, ready, pending, construct registry count, construct candidate count, review-required count, export paths, and literature-map node/edge counts.
 
 ## DOI Handling
 
