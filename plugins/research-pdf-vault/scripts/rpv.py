@@ -27,6 +27,11 @@ from research_pdf_vault.citation_cli import (
 from research_pdf_vault.embeddings import EmbeddingBackendError
 from research_pdf_vault.fts import FtsUnavailableError
 from research_pdf_vault.index_build import build_local_index
+from research_pdf_vault.import_cli import (
+    PdfImportError,
+    add_import_parser,
+    run_import,
+)
 from research_pdf_vault.literature_cli import (
     add_literature_map_parser,
     run_literature_map,
@@ -61,6 +66,7 @@ def build_parser() -> argparse.ArgumentParser:
     ingest_parser = subparsers.add_parser("ingest")
     ingest_parser.add_argument("--config", type=Path)
     ingest_parser.add_argument("--once", action="store_true", required=True)
+    add_import_parser(subparsers)
     report_parser = subparsers.add_parser("report")
     report_parser.add_argument("--config", type=Path)
     add_citation_slots_parser(subparsers)
@@ -152,6 +158,8 @@ def main(argv: Sequence[str] | None = None) -> int:
             return run_scan(args)
         if args.command == "ingest":
             return run_ingest(args)
+        if args.command == "import":
+            return run_import(args)
         if args.command == "report":
             return run_report(args)
         if args.command == "citation-slots":
@@ -172,6 +180,9 @@ def main(argv: Sequence[str] | None = None) -> int:
         print(f"error: {error}", file=sys.stderr)
         return 1
     except CitationFixtureError as error:
+        print(f"error: {error}", file=sys.stderr)
+        return 1
+    except PdfImportError as error:
         print(f"error: {error}", file=sys.stderr)
         return 1
     except OSError as error:
