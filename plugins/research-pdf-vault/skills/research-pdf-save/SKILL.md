@@ -73,7 +73,15 @@ When asking, state exactly the action, source, destination, and risk. Ask for a 
 python3 plugins/research-pdf-vault/scripts/rpv.py ingest --once --config <config-path>
 ```
 
-6. Report observable counts: scanned, ready, pending, review queue count, and whether construct/structure generation was run.
+6. When structure is requested or implied, build construct candidates and refresh the literature map:
+
+```bash
+python3 plugins/research-pdf-vault/scripts/rpv.py constructs build --config <config-path>
+python3 plugins/research-pdf-vault/scripts/rpv.py literature-map build --config <config-path>
+python3 plugins/research-pdf-vault/scripts/rpv.py literature-map report --config <config-path>
+```
+
+7. Report observable counts: scanned, ready, pending, construct registry count, construct candidate count, review-required count, and literature-map node/edge counts.
 
 ## DOI Handling
 

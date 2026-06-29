@@ -20,6 +20,7 @@ from research_pdf_vault.config import (
     load_config,
     write_default_config,
 )
+from research_pdf_vault.constructs_cli import add_constructs_parser, run_constructs
 from research_pdf_vault.citation_cli import (
     add_citation_slots_parser,
     run_citation_slots,
@@ -69,6 +70,7 @@ def build_parser() -> argparse.ArgumentParser:
     add_import_parser(subparsers)
     report_parser = subparsers.add_parser("report")
     report_parser.add_argument("--config", type=Path)
+    add_constructs_parser(subparsers)
     add_citation_slots_parser(subparsers)
     add_optional_review_parser(subparsers)
     add_notify_parser(subparsers)
@@ -162,6 +164,8 @@ def main(argv: Sequence[str] | None = None) -> int:
             return run_import(args)
         if args.command == "report":
             return run_report(args)
+        if args.command == "constructs":
+            return run_constructs(args)
         if args.command == "citation-slots":
             return run_citation_slots(args)
         if args.command == "review":
