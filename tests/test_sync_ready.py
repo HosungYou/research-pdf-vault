@@ -20,6 +20,19 @@ PDF_BYTES: Final = (
     b"%%EOF\n"
 )
 
+COMPRESSED_PDF_BYTES: Final = (
+    b"%PDF-1.7\n"
+    b"1 0 obj << /Type /ObjStm /N 1 /First 8 >> stream\n"
+    b"compressed object bytes\n"
+    b"endstream endobj\n"
+    b"2 0 obj << /Type /XRef /Root 3 0 R >> stream\n"
+    b"xref bytes\n"
+    b"endstream endobj\n"
+    b"startxref\n"
+    b"1\n"
+    b"%%EOF\n"
+)
+
 
 @dataclass(frozen=True, slots=True)
 class FakeSample:
@@ -61,6 +74,24 @@ def test_probe_sync_ready_when_pdf_is_readable_then_returns_ready_with_sha(
     assert result.retry_after_seconds is None
 
 
+def test_probe_sync_ready_when_pdf_uses_object_streams_then_returns_ready(
+    tmp_path: Path,
+) -> None:
+    from research_pdf_vault.sync_ready import SyncReadyStatus, probe_sync_ready
+
+    # Given
+    pdf_path = tmp_path / "unit-object-stream.pdf"
+    pdf_path.write_bytes(COMPRESSED_PDF_BYTES)
+
+    # When
+    result = probe_sync_ready(pdf_path)
+
+    # Then
+    assert result.status is SyncReadyStatus.READY
+    assert result.sha256 == hashlib.sha256(COMPRESSED_PDF_BYTES).hexdigest()
+    assert result.retry_after_seconds is None
+
+
 def test_probe_sync_ready_when_file_changes_between_samples_then_pending(
     tmp_path: Path,
 ) -> None:
@@ -99,6 +130,25 @@ def test_probe_sync_ready_when_header_is_invalid_then_pending_with_hash(
 
     # Then
     assert result.status is SyncReadyStatus.INVALID_PDF_HEADER
+    assert result.sha256 == hashlib.sha256(invalid_bytes).hexdigest()
+    assert result.retry_after_seconds == 300
+
+
+def test_probe_sync_ready_when_pdf_has_no_page_or_xref_structure_then_pending(
+    tmp_path: Path,
+) -> None:
+    from research_pdf_vault.sync_ready import SyncReadyStatus, probe_sync_ready
+
+    # Given
+    invalid_bytes = b"%PDF-1.7\n%%EOF\n"
+    pdf_path = tmp_path / "unit-invalid-structure.pdf"
+    pdf_path.write_bytes(invalid_bytes)
+
+    # When
+    result = probe_sync_ready(pdf_path)
+
+    # Then
+    assert result.status is SyncReadyStatus.INVALID_PDF_PARSE
     assert result.sha256 == hashlib.sha256(invalid_bytes).hexdigest()
     assert result.retry_after_seconds == 300
 
