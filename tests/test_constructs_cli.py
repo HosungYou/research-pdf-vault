@@ -143,6 +143,111 @@ def test_constructs_export_when_candidates_exist_then_writes_jsonl_and_markdown(
     assert "UTAUT survey scale" in markdown
 
 
+def test_constructs_review_approve_when_candidate_requires_review_then_marks_approved(
+    tmp_path: Path,
+) -> None:
+    # Given
+    config_path = _prepared_construct_vault(tmp_path)
+    manifest_db = tmp_path / "cache" / "manifest.sqlite3"
+    candidate_id = _first_candidate_id(manifest_db)
+    _mark_candidate_for_review(manifest_db, candidate_id)
+
+    # When
+    listed = _run_rpv(
+        "constructs",
+        "review",
+        "list",
+        "--config",
+        str(config_path),
+        cwd=tmp_path,
+    )
+    approved = _run_rpv(
+        "constructs",
+        "review",
+        "approve",
+        candidate_id,
+        "--config",
+        str(config_path),
+        "--actor",
+        "tester",
+        "--reason",
+        "construct verified",
+        cwd=tmp_path,
+    )
+
+    # Then
+    assert listed.returncode == 0, listed.stderr
+    assert candidate_id in listed.stdout
+    assert "AI acceptance" in listed.stdout
+    assert approved.returncode == 0, approved.stderr
+    assert f"construct review ok: action=approve candidate_id={candidate_id}" in approved.stdout
+    assert _candidate_review_state(manifest_db, candidate_id) == ("approved", 0)
+
+
+def test_constructs_review_reject_when_candidate_is_wrong_then_marks_rejected(
+    tmp_path: Path,
+) -> None:
+    # Given
+    config_path = _prepared_construct_vault(tmp_path)
+    manifest_db = tmp_path / "cache" / "manifest.sqlite3"
+    candidate_id = _first_candidate_id(manifest_db)
+    _mark_candidate_for_review(manifest_db, candidate_id)
+
+    # When
+    rejected = _run_rpv(
+        "constructs",
+        "review",
+        "reject",
+        candidate_id,
+        "--config",
+        str(config_path),
+        "--actor",
+        "tester",
+        "--reason",
+        "not a construct",
+        cwd=tmp_path,
+    )
+
+    # Then
+    assert rejected.returncode == 0, rejected.stderr
+    assert f"construct review ok: action=reject candidate_id={candidate_id}" in rejected.stdout
+    assert _candidate_review_state(manifest_db, candidate_id) == ("rejected", 0)
+
+
+def test_constructs_review_reassign_when_target_construct_exists_then_moves_candidate(
+    tmp_path: Path,
+) -> None:
+    # Given
+    config_path = _prepared_construct_vault(tmp_path)
+    manifest_db = tmp_path / "cache" / "manifest.sqlite3"
+    candidate_id = _first_candidate_id(manifest_db)
+    target_construct_id = _last_construct_id(manifest_db)
+    _mark_candidate_for_review(manifest_db, candidate_id)
+
+    # When
+    reassigned = _run_rpv(
+        "constructs",
+        "review",
+        "reassign",
+        candidate_id,
+        "--construct",
+        target_construct_id,
+        "--config",
+        str(config_path),
+        "--actor",
+        "tester",
+        "--reason",
+        "same construct family",
+        cwd=tmp_path,
+    )
+
+    # Then
+    assert reassigned.returncode == 0, reassigned.stderr
+    assert f"construct review ok: action=reassign candidate_id={candidate_id}" in reassigned.stdout
+    assert _candidate_target(manifest_db, candidate_id) == target_construct_id
+    assert _candidate_review_state(manifest_db, candidate_id) == ("approved", 0)
+
+
 def _config_text() -> str:
     return "\n".join(
         (
@@ -180,6 +285,19 @@ def _config_text() -> str:
     )
 
 
+def _prepared_construct_vault(tmp_path: Path) -> Path:
+    library = tmp_path / "library"
+    library.mkdir()
+    (library / "constructs.pdf").write_bytes(TEXT_PDF_BYTES)
+    config_path = tmp_path / "rpv.toml"
+    config_path.write_text(_config_text(), encoding="utf-8")
+    ingest = _run_rpv("ingest", "--once", "--config", str(config_path), cwd=tmp_path)
+    build = _run_rpv("constructs", "build", "--config", str(config_path), cwd=tmp_path)
+    assert ingest.returncode == 0, ingest.stderr
+    assert build.returncode == 0, build.stderr
+    return config_path
+
+
 def _run_rpv(
     *args: str,
     cwd: Path,
@@ -191,6 +309,48 @@ def _run_rpv(
         capture_output=True,
         text=True,
     )
+
+
+def _first_candidate_id(manifest_db: Path) -> str:
+    with sqlite3.connect(manifest_db) as connection:
+        row = connection.execute(
+            "SELECT candidate_id FROM construct_candidate ORDER BY reported_term LIMIT 1",
+        ).fetchone()
+    return str(row[0])
+
+
+def _last_construct_id(manifest_db: Path) -> str:
+    with sqlite3.connect(manifest_db) as connection:
+        row = connection.execute(
+            "SELECT construct_id FROM construct_registry ORDER BY canonical_label DESC LIMIT 1",
+        ).fetchone()
+    return str(row[0])
+
+
+def _mark_candidate_for_review(manifest_db: Path, candidate_id: str) -> None:
+    with sqlite3.connect(manifest_db) as connection:
+        connection.execute(
+            "UPDATE construct_candidate SET review_required = 1 WHERE candidate_id = ?",
+            (candidate_id,),
+        )
+
+
+def _candidate_review_state(manifest_db: Path, candidate_id: str) -> tuple[str, int]:
+    with sqlite3.connect(manifest_db) as connection:
+        row = connection.execute(
+            "SELECT candidate_status, review_required FROM construct_candidate WHERE candidate_id = ?",
+            (candidate_id,),
+        ).fetchone()
+    return (str(row[0]), int(row[1]))
+
+
+def _candidate_target(manifest_db: Path, candidate_id: str) -> str:
+    with sqlite3.connect(manifest_db) as connection:
+        row = connection.execute(
+            "SELECT construct_id FROM construct_candidate WHERE candidate_id = ?",
+            (candidate_id,),
+        ).fetchone()
+    return str(row[0])
 
 
 def _candidate_rows(manifest_db: Path) -> list[tuple[str, str, str, str, int]]:

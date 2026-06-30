@@ -78,11 +78,12 @@ python3 plugins/research-pdf-vault/scripts/rpv.py ingest --once --config <config
 ```bash
 python3 plugins/research-pdf-vault/scripts/rpv.py constructs build --config <config-path>
 python3 plugins/research-pdf-vault/scripts/rpv.py constructs export --config <config-path>
+python3 plugins/research-pdf-vault/scripts/rpv.py constructs review list --config <config-path>
 python3 plugins/research-pdf-vault/scripts/rpv.py literature-map build --config <config-path>
 python3 plugins/research-pdf-vault/scripts/rpv.py literature-map report --config <config-path>
 ```
 
-7. Report observable counts: scanned, ready, pending, construct registry count, construct candidate count, review-required count, export paths, and literature-map node/edge counts.
+7. Report observable counts: scanned, ready, pending, construct registry count, construct candidate count, review-required count, export paths, pending construct review rows, and literature-map node/edge counts.
 
 ## DOI Handling
 
@@ -103,6 +104,14 @@ When asked to structure after saving, prioritize construct-centered organization
 - candidate link to `construct_registry`
 
 Low-confidence construct links, theoretical role conflicts, measurement family conflicts, and all construct merges require review.
+
+Use review actions only when the user asks to decide a candidate:
+
+```bash
+python3 plugins/research-pdf-vault/scripts/rpv.py constructs review approve <candidate_id> --actor <actor> --reason <reason> --config <config-path>
+python3 plugins/research-pdf-vault/scripts/rpv.py constructs review reject <candidate_id> --actor <actor> --reason <reason> --config <config-path>
+python3 plugins/research-pdf-vault/scripts/rpv.py constructs review reassign <candidate_id> --construct <construct_id> --actor <actor> --reason <reason> --config <config-path>
+```
 
 ## Public-Safe Output
 

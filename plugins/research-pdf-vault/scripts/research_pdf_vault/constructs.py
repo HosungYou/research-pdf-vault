@@ -15,7 +15,7 @@ from research_pdf_vault.scan_db import now_timestamp
 CONSTRUCT_SQL: Final = "\n".join(
     (
         "CREATE TABLE IF NOT EXISTS construct_registry (construct_id TEXT PRIMARY KEY CHECK (construct_id GLOB 'construct_*'), canonical_label TEXT NOT NULL CHECK (length(canonical_label) > 0), aliases_json TEXT NOT NULL CHECK (length(aliases_json) > 1), definition_notes TEXT NOT NULL, measurement_families_json TEXT NOT NULL CHECK (length(measurement_families_json) > 1), theory_links_json TEXT NOT NULL CHECK (length(theory_links_json) > 1), merge_status TEXT NOT NULL CHECK (merge_status IN ('candidate', 'approved', 'merged', 'rejected')), review_status TEXT NOT NULL CHECK (review_status IN ('auto', 'needs_review', 'approved', 'rejected')), created_at TEXT NOT NULL);",
-        "CREATE TABLE IF NOT EXISTS construct_candidate (candidate_id TEXT PRIMARY KEY CHECK (candidate_id GLOB 'ccand_*'), paper_id TEXT NOT NULL REFERENCES paper(paper_id), construct_id TEXT NOT NULL REFERENCES construct_registry(construct_id), reported_term TEXT NOT NULL CHECK (length(reported_term) > 0), candidate_normalization TEXT NOT NULL CHECK (length(candidate_normalization) > 0), measurement_proxy TEXT NOT NULL CHECK (length(measurement_proxy) > 0), theoretical_role TEXT NOT NULL CHECK (length(theoretical_role) > 0), confidence REAL NOT NULL CHECK (confidence >= 0.0 AND confidence <= 1.0), review_required INTEGER NOT NULL CHECK (review_required IN (0, 1)), source_page INTEGER NOT NULL CHECK (source_page >= 1), created_at TEXT NOT NULL);",
+        "CREATE TABLE IF NOT EXISTS construct_candidate (candidate_id TEXT PRIMARY KEY CHECK (candidate_id GLOB 'ccand_*'), paper_id TEXT NOT NULL REFERENCES paper(paper_id), construct_id TEXT NOT NULL REFERENCES construct_registry(construct_id), reported_term TEXT NOT NULL CHECK (length(reported_term) > 0), candidate_normalization TEXT NOT NULL CHECK (length(candidate_normalization) > 0), measurement_proxy TEXT NOT NULL CHECK (length(measurement_proxy) > 0), theoretical_role TEXT NOT NULL CHECK (length(theoretical_role) > 0), confidence REAL NOT NULL CHECK (confidence >= 0.0 AND confidence <= 1.0), review_required INTEGER NOT NULL CHECK (review_required IN (0, 1)), candidate_status TEXT NOT NULL CHECK (candidate_status IN ('pending', 'approved', 'rejected')), source_page INTEGER NOT NULL CHECK (source_page >= 1), created_at TEXT NOT NULL);",
     ),
 )
 _LINE_RE: Final = re.compile(
@@ -44,6 +44,7 @@ class ConstructCandidate:
 
 def initialize_construct_tables(connection: sqlite3.Connection) -> None:
     connection.executescript(CONSTRUCT_SQL)
+    _ensure_candidate_status_column(connection)
 
 
 def build_construct_candidates(config: VaultRuntimeConfig) -> ConstructBuildSummary:
@@ -119,7 +120,7 @@ def _upsert_construct_candidate(
         ),
     )
     connection.execute(
-        "INSERT INTO construct_candidate (candidate_id, paper_id, construct_id, reported_term, candidate_normalization, measurement_proxy, theoretical_role, confidence, review_required, source_page, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) "
+        "INSERT INTO construct_candidate (candidate_id, paper_id, construct_id, reported_term, candidate_normalization, measurement_proxy, theoretical_role, confidence, review_required, candidate_status, source_page, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) "
         "ON CONFLICT(candidate_id) DO UPDATE SET reported_term = excluded.reported_term, candidate_normalization = excluded.candidate_normalization, measurement_proxy = excluded.measurement_proxy, theoretical_role = excluded.theoretical_role, confidence = excluded.confidence, review_required = excluded.review_required, source_page = excluded.source_page",
         (
             _candidate_id(candidate),
@@ -131,6 +132,7 @@ def _upsert_construct_candidate(
             candidate.theoretical_role,
             0.86,
             0,
+            "pending",
             candidate.source_page,
             timestamp,
         ),
@@ -142,6 +144,18 @@ def _summary(connection: sqlite3.Connection) -> ConstructBuildSummary:
         registry_count=_table_count(connection, "construct_registry"),
         candidate_count=_table_count(connection, "construct_candidate"),
         review_required_count=_review_required_count(connection),
+    )
+
+
+def _ensure_candidate_status_column(connection: sqlite3.Connection) -> None:
+    columns = {
+        str(row[1])
+        for row in connection.execute("PRAGMA table_info(construct_candidate)")
+    }
+    if "candidate_status" in columns:
+        return
+    connection.execute(
+        "ALTER TABLE construct_candidate ADD COLUMN candidate_status TEXT NOT NULL DEFAULT 'pending' CHECK (candidate_status IN ('pending', 'approved', 'rejected'))",
     )
 
 

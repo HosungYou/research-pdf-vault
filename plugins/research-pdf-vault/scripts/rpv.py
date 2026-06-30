@@ -21,6 +21,7 @@ from research_pdf_vault.config import (
     write_default_config,
 )
 from research_pdf_vault.constructs_cli import add_constructs_parser, run_constructs
+from research_pdf_vault.constructs_review import ConstructReviewError
 from research_pdf_vault.citation_cli import (
     add_citation_slots_parser,
     run_citation_slots,
@@ -187,6 +188,9 @@ def main(argv: Sequence[str] | None = None) -> int:
         print(f"error: {error}", file=sys.stderr)
         return 1
     except PdfImportError as error:
+        print(f"error: {error}", file=sys.stderr)
+        return 1
+    except ConstructReviewError as error:
         print(f"error: {error}", file=sys.stderr)
         return 1
     except OSError as error:
